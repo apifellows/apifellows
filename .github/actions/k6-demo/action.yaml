@@ -1,0 +1,5 @@
+name: "K6 demo action"
+description: "A simple action that executes some K6 calls based on the official K6 docker image."
+runs:
+  using: "docker"
+  image: "Dockerfile"

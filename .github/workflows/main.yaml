@@ -1,0 +1,37 @@
+name: Example Workflow
+
+# Controls when the workflow will run
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "perform-curl"
+  do-demo:
+    
+    # The type of runner that the job will run on
+    runs-on: [atc-ubuntu-latest]
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      # List available shells
+      - name: List available shells
+        run: cat /etc/shells
+
+      # Perform dummy action
+      - name: Perform Dummy Action
+        uses: GCDM/gcdm-architecture/.github/actions/dummy-action@v1.0.0
+        with:
+          url: 'https://customer.bmwgroup.com' # Add URL as parameter      # Perform dummy action
+      
+      # Run K6 demo
+      - name: Perform K6 demo
+        uses: GCDM/gcdm-architecture/.github/actions/k6-demo@v1.0.0

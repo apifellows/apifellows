@@ -1,0 +1,27 @@
+name: "Dummy action"
+description: "A simple dummy github action that performs a cURL command."
+inputs:
+  url:
+    description: "The URL to call."
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: "Perform cURL request"
+      shell: bash
+      run: |
+        # Passed parameter url
+        URL="${{ inputs.url }}"
+
+        # Run the cURL command and get the URL param
+        response=$(curl -s -o /dev/null -w "%{http_code}" "$URL")
+
+        # Evaluate status code
+        if [[ $response -ge 200 && $response -lt 300 ]]; then
+            echo "All is well!"
+        elif [[ $response -ge 300 && $response -lt 400 ]] || [[ $response -ge 500 ]]; then
+            echo "Error on server side - none of our business, so let's continue."
+        else
+            echo "Error on client side with status code: $response"
+            #exit 1  # We need to exit!
+        fi
