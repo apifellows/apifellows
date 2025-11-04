@@ -1,4 +1,4 @@
-name: @apifellows OAS3 Linter
+name: Demo Workflow
 
 on:
   push:
@@ -39,6 +39,7 @@ on:
 jobs:
  linter-oas3:
     name: Validate Open API Specification (OAS3)
+    if: github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
     
     steps:
