@@ -36,7 +36,7 @@ runs:
       run: |
         echo ""
         echo "╔══════════════════════════════════════════════════════════════════╗"
-        echo "║                 ApiFellows OAS3 Linter                           ║"
+        echo "║            @apifellows CI/CD Quality Gate for: OAS3              ║"
         echo "╚══════════════════════════════════════════════════════════════════╝"
         echo ""
         
@@ -96,7 +96,7 @@ runs:
             echo "Your OpenAPI specification is valid!"
             echo ""
             echo "🔗 For detailed metrics, upload your file at:"
-            echo "   https://www.apifellows.com/"
+            echo "   https://www.apifellows.com/rest-api-linter"
             echo ""
             
             echo "result=success" >> $GITHUB_OUTPUT
@@ -131,7 +131,7 @@ runs:
             echo "Your OpenAPI specification contains validation errors."
             echo ""
             echo "🔗 For detailed error report, upload your file at:"
-            echo "   https://www.apifellows.com/"
+            echo "   https://www.apifellows.com/rest-api-linter"
             echo ""
             
             if [ "$CONTINUE_ON_SPEC_ERROR" = "true" ]; then
