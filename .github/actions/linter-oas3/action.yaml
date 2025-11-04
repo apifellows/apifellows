@@ -14,6 +14,10 @@ inputs:
     description: 'Continue execution if server returns 5xx error'
     required: false
     default: 'false'
+  continue-on-specification-error:
+    description: 'Continue execution if specification validation fails (HTTP 422)'
+    required: false
+    default: 'false'
 
 outputs:
   result:
@@ -39,6 +43,7 @@ runs:
         FILE_PATH="${{ inputs.file-path }}"
         VERSION="${{ inputs.version }}"
         CONTINUE_ON_ERROR="${{ inputs.continue-on-server-error }}"
+        CONTINUE_ON_SPEC_ERROR="${{ inputs.continue-on-specification-error }}"
         API_URL="https://api.apifellows.com/linter-oas3/${VERSION}/oas3/checkfile"
         
         echo "📋 Configuration:"
@@ -46,6 +51,7 @@ runs:
         echo "   • API Version: $VERSION"
         echo "   • API URL: $API_URL"
         echo "   • Continue on Server Error: $CONTINUE_ON_ERROR"
+        echo "   • Continue on Specification Error: $CONTINUE_ON_SPEC_ERROR"
         echo ""
         
         # Check if file exists
@@ -118,31 +124,98 @@ runs:
             echo "══════════════════════════════════════════════════════════════════"
             echo ""
             
-            # Parse and display validation errors
-            MESSAGES=$(echo "$BODY" | grep -o '"messages":\[[^]]*\]' || echo "")
+            # Extract overall score
+            TOTAL_SCORE=$(echo "$BODY" | grep -o '"total":[0-9]*' | head -1 | cut -d':' -f2 || echo "N/A")
+            echo "📊 Overall Quality Score: ${TOTAL_SCORE}%"
+            echo ""
             
-            if [ ! -z "$MESSAGES" ]; then
-              echo "The following issues were found in your specification:"
-              echo ""
+            # Display metrics table
+            echo "┌──────────────┬─────────────┬──────────────┬──────────────┬──────────────┐"
+            echo "│ Section      │ Failed MUST │ Failed SHOULD│ Failed COULD │ Failed Total │"
+            echo "├──────────────┼─────────────┼──────────────┼──────────────┼──────────────┤"
+            
+            # Extract metrics for each section
+            for SECTION in yaml oas info servers security paths components tags externaldocs total; do
+              # Extract failed counts for each severity
+              MUST_FAILED=$(echo "$BODY" | grep -o "\"$SECTION\":{[^}]*\"must\":{[^}]*\"failed\":[0-9]*" | grep -o "\"failed\":[0-9]*" | cut -d':' -f2 || echo "0")
+              SHOULD_FAILED=$(echo "$BODY" | grep -o "\"$SECTION\":{[^}]*\"should\":{[^}]*\"failed\":[0-9]*" | grep -o "\"failed\":[0-9]*" | cut -d':' -f2 || echo "0")
+              OPTIONAL_FAILED=$(echo "$BODY" | grep -o "\"$SECTION\":{[^}]*\"optional\":{[^}]*\"failed\":[0-9]*" | grep -o "\"failed\":[0-9]*" | cut -d':' -f2 || echo "0")
+              TOTAL_FAILED=$(echo "$BODY" | grep -o "\"$SECTION\":{[^}]*\"total\":{[^}]*\"failed\":[0-9]*" | grep -o "\"failed\":[0-9]*" | cut -d':' -f2 || echo "0")
               
-              # Extract individual messages (simplified parsing)
-              echo "$BODY" | grep -o '"line":[0-9]*' | cut -d':' -f2 | while read LINE_NUM; do
-                # This is a simplified version - you may need jq for proper JSON parsing
-                echo "  ⚠ Line $LINE_NUM: Validation issue detected"
+              # Default to 0 if empty
+              MUST_FAILED=${MUST_FAILED:-0}
+              SHOULD_FAILED=${SHOULD_FAILED:-0}
+              OPTIONAL_FAILED=${OPTIONAL_FAILED:-0}
+              TOTAL_FAILED=${TOTAL_FAILED:-0}
+              
+              # Format section name with proper capitalization
+              SECTION_NAME=$(echo "$SECTION" | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}')
+              
+              # Add separator before total row
+              if [ "$SECTION" = "total" ]; then
+                echo "├──────────────┼─────────────┼──────────────┼──────────────┼──────────────┤"
+                SECTION_NAME="TOTAL"
+              fi
+              
+              # Print row with proper padding
+              printf "│ %-12s │ %11s │ %12s │ %12s │ %12s │\n" \
+                "$SECTION_NAME" "$MUST_FAILED" "$SHOULD_FAILED" "$OPTIONAL_FAILED" "$TOTAL_FAILED"
+            done
+            
+            echo "└──────────────┴─────────────┴──────────────┴──────────────┴──────────────┘"
+            echo ""
+            
+            # Extract and display MUST errors
+            echo "❌ MUST Errors (must be fixed):"
+            echo ""
+            
+            # Use a temporary file to store MUST errors
+            TEMP_FILE=$(mktemp)
+            
+            # Extract messages with proper JSON parsing (simplified - works for most cases)
+            echo "$BODY" | grep -o '"severity":"MUST"[^}]*"status":"FAIL"[^}]*' | while IFS= read -r MSG; do
+              LINE=$(echo "$MSG" | grep -o '"line":[0-9]*' | cut -d':' -f2)
+              TITLE=$(echo "$MSG" | grep -o '"title":"[^"]*"' | cut -d'"' -f4)
+              
+              if [ ! -z "$LINE" ] && [ ! -z "$TITLE" ]; then
+                echo "  • Line $LINE: $TITLE"
+              fi
+            done
+            
+            # Alternative approach if the first one doesn't capture all errors
+            if ! echo "$BODY" | grep -q '"severity":"MUST"[^}]*"status":"FAIL"'; then
+              # Fallback: just extract line numbers for FAIL status
+              echo "$BODY" | grep -o '"status":"FAIL"[^}]*"line":[0-9]*' | while IFS= read -r MSG; do
+                LINE=$(echo "$MSG" | grep -o '"line":[0-9]*' | cut -d':' -f2)
+                if [ ! -z "$LINE" ]; then
+                  echo "  • Line $LINE: Validation error"
+                fi
               done
-              
-              echo ""
-              echo "💡 Tip: Review the specification at the indicated line numbers"
-            else
-              echo "Validation errors were detected but could not be parsed."
-              echo ""
-              echo "Full response:"
-              echo "$BODY"
             fi
             
             echo ""
-            echo "result=error" >> $GITHUB_OUTPUT
-            exit 1
+            echo "ℹ️  For detailed information about PASSED rules, SHOULD recommendations,"
+            echo "   and COULD suggestions, please visit:"
+            echo ""
+            echo "   🔗 https://www.apifellows.com/"
+            echo ""
+            
+            rm -f "$TEMP_FILE"
+            echo ""
+            
+            if [ "$CONTINUE_ON_SPEC_ERROR" = "true" ]; then
+              echo "⚠️  Continuing execution (continue-on-specification-error: true)"
+              echo ""
+              echo "result=warning" >> $GITHUB_OUTPUT
+              exit 0
+            else
+              echo "❌ Failing build (continue-on-specification-error: false)"
+              echo ""
+              echo "💡 Tip: Set 'continue-on-specification-error: true' to ignore validation errors"
+              echo ""
+              echo "result=error" >> $GITHUB_OUTPUT
+              exit 1
+            fi
             ;;
             
           5*)

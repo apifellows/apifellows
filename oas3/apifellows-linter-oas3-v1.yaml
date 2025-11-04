@@ -16,6 +16,24 @@ servers:
     url: http://localhost/
   - description: '@apifellows production environment'
     url: https://api.apifellows.com/linter-oas3/v1
+openapi: 3.1.0
+info:
+  contact:
+    email: support@apifellows.com
+    name: '@apifellows Support Team'
+    url: https://www.apifellows.com/support
+  description: 'This REST API allows users to validate their OpenAPI Specification
+    in version 3.x (OAS3) against our REST API guidelines. It provides tools for:
+    - Validating OpenAPI Specification YAML-files.
+    - Linting and enforcing REST API guidelines.
+    - Reporting compliance issues and suggested fixes.'
+  title: '@apifellows Online REST API Linter'
+  version: 1.0.0
+servers:
+  - description: '@apifellows local environment'
+    url: http://localhost/
+  - description: '@apifellows production environment'
+    url: https://api.apifellows.com/linter-oas3/v1
 paths:
   /oas3/checkfile:
     post:
@@ -38,6 +56,387 @@ paths:
       responses:
         '200':
           description: The OpenAPI specification was successfully validated.
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      info:
+                        properties:
+                          date:
+                            format: date-time
+                            type: string
+                          filename:
+                            type: string
+                          title:
+                            type: string
+                          version:
+                            type: string
+                        type: object
+                      messages:
+                        items:
+                          description: A detailed validation message.
+                          properties:
+                            line:
+                              description: The line number where the rule applies.
+                              type: integer
+                            rule:
+                              description: The unique identifier of the validation rule.
+                              type: string
+                            section:
+                              description: The section of the specification the rule applies to.
+                              type: string
+                            severity:
+                              description: The severity level of the validation rule.
+                              enum:
+                                - MUST
+                                - SHOULD
+                                - MUST_NOT
+                                - OPTIONAL
+                              type: string
+                            status:
+                              description: Indicates if the rule passed, failed or skipped.
+                              enum:
+                                - PASS
+                                - SKIP
+                                - FAIL
+                              type: string
+                            title:
+                              description: The title of the validation rule.
+                              type: string
+                            url:
+                              description: A link to detailed documentation for the rule.
+                              format: uri
+                              type: string
+                          type: object
+                        type: array
+                      metrics:
+                        additionalProperties:
+                          properties:
+                            must:
+                              description: Metrics for a specific validation severity level.
+                              properties:
+                                failed:
+                                  description: Number of rules that failed validation.
+                                  type: integer
+                                passed:
+                                  description: Number of rules that passed validation.
+                                  type: integer
+                                total:
+                                  description: Total number of rules evaluated.
+                                  type: integer
+                              type: object
+                            must_not:
+                              description: Metrics for a specific validation severity level.
+                              properties:
+                                failed:
+                                  description: Number of rules that failed validation.
+                                  type: integer
+                                passed:
+                                  description: Number of rules that passed validation.
+                                  type: integer
+                                total:
+                                  description: Total number of rules evaluated.
+                                  type: integer
+                              type: object
+                            optional:
+                              description: Metrics for a specific validation severity level.
+                              properties:
+                                failed:
+                                  description: Number of rules that failed validation.
+                                  type: integer
+                                passed:
+                                  description: Number of rules that passed validation.
+                                  type: integer
+                                total:
+                                  description: Total number of rules evaluated.
+                                  type: integer
+                              type: object
+                            should:
+                              description: Metrics for a specific validation severity level.
+                              properties:
+                                failed:
+                                  description: Number of rules that failed validation.
+                                  type: integer
+                                passed:
+                                  description: Number of rules that passed validation.
+                                  type: integer
+                                total:
+                                  description: Total number of rules evaluated.
+                                  type: integer
+                              type: object
+                            total:
+                              description: Metrics for a specific validation severity level.
+                              properties:
+                                failed:
+                                  description: Number of rules that failed validation.
+                                  type: integer
+                                passed:
+                                  description: Number of rules that passed validation.
+                                  type: integer
+                                total:
+                                  description: Total number of rules evaluated.
+                                  type: integer
+                              type: object
+                          type: object
+                        description: Validation metrics organized by section and severity.
+                        type: object
+                      score:
+                        type: object
+                    type: object
+                  status:
+                    description: The overall validation result status.
+                    enum:
+                      - SPECIFICATION_VALID
+                      - SPECIFICATION_WARNING
+                      - SPECIFICATION_ERROR
+                    type: string
+                  status_code:
+                    description: A machine-readable code representing the validation status.
+                    type: string
+                  status_message:
+                    description: A human-readable message describing the validation outcome.
+                    type: string
+                type: object
+        '400':
+          content:
+            application/json:
+              schema:
+                description: A generic error response for 4xx or 5xx HTTP errors.
+                properties:
+                  error:
+                    description: A description of the problem with the request.
+                    type: string
+                type: object
+          description: The request is invalid or improperly formatted.
+        '401':
+          content:
+            application/json:
+              schema:
+                description: A generic error response for 4xx or 5xx HTTP errors.
+                properties:
+                  error:
+                    description: A description of the problem with the request.
+                    type: string
+                type: object
+          description: Authentication is required and has not been provided or is invalid.
+        '403':
+          content:
+            application/json:
+              schema:
+                description: A generic error response for 4xx or 5xx HTTP errors.
+                properties:
+                  error:
+                    description: A description of the problem with the request.
+                    type: string
+                type: object
+          description: The user does not have permission to access this resource.
+        '422':
+          content:
+            application/json:
+              schema:
+                properties:
+                  data:
+                    properties:
+                      info:
+                        properties:
+                          date:
+                            format: date-time
+                            type: string
+                            example: '2025-11-04 04:03:00'
+                          filename:
+                            type: string
+                            example: demo-422.yaml
+                          title:
+                            type: string
+                            example: 'No or invalid API title'
+                          version:
+                            type: string
+                            example: '0.1.9'
+                        type: object
+                      messages:
+                        items:
+                          description: A detailed validation message.
+                          properties:
+                            excerpt:
+                              description: Code excerpt around the error line.
+                              type: string
+                            excerpt_line_from:
+                              description: Starting line number of the excerpt.
+                              type: integer
+                            excerpt_line_to:
+                              description: Ending line number of the excerpt.
+                              type: integer
+                            fixes:
+                              description: Suggested fixes for this validation issue.
+                              type: array
+                              items:
+                                type: object
+                            line:
+                              description: The line number where the rule applies.
+                              type: integer
+                            number:
+                              description: Sequential number of this message.
+                              type: integer
+                            rule:
+                              description: The unique identifier of the validation rule.
+                              type: string
+                            section:
+                              description: The section of the specification the rule applies to.
+                              type: string
+                            severity:
+                              description: The severity level of the validation rule.
+                              enum:
+                                - MUST
+                                - SHOULD
+                                - MUST_NOT
+                                - SHOULD_NOT
+                                - OPTIONAL
+                              type: string
+                            status:
+                              description: Indicates if the rule passed, failed or skipped.
+                              enum:
+                                - PASS
+                                - SKIP
+                                - FAIL
+                              type: string
+                            title:
+                              description: The title of the validation rule.
+                              type: string
+                            url:
+                              description: A link to detailed documentation for the rule.
+                              format: uri
+                              type: string
+                          type: object
+                        type: array
+                      metrics:
+                        additionalProperties:
+                          properties:
+                            must:
+                              description: Metrics for MUST severity level.
+                              properties:
+                                failed:
+                                  type: integer
+                                passed:
+                                  type: integer
+                                skipped:
+                                  type: integer
+                                total:
+                                  type: integer
+                              type: object
+                            must_not:
+                              description: Metrics for MUST_NOT severity level.
+                              properties:
+                                failed:
+                                  type: integer
+                                passed:
+                                  type: integer
+                                skipped:
+                                  type: integer
+                                total:
+                                  type: integer
+                              type: object
+                            should:
+                              description: Metrics for SHOULD severity level.
+                              properties:
+                                failed:
+                                  type: integer
+                                passed:
+                                  type: integer
+                                skipped:
+                                  type: integer
+                                total:
+                                  type: integer
+                              type: object
+                            should_not:
+                              description: Metrics for SHOULD_NOT severity level.
+                              properties:
+                                failed:
+                                  type: integer
+                                passed:
+                                  type: integer
+                                skipped:
+                                  type: integer
+                                total:
+                                  type: integer
+                              type: object
+                            optional:
+                              description: Metrics for OPTIONAL severity level.
+                              properties:
+                                failed:
+                                  type: integer
+                                passed:
+                                  type: integer
+                                skipped:
+                                  type: integer
+                                total:
+                                  type: integer
+                              type: object
+                            total:
+                              description: Total metrics across all severities.
+                              properties:
+                                failed:
+                                  type: integer
+                                passed:
+                                  type: integer
+                                skipped:
+                                  type: integer
+                                total:
+                                  type: integer
+                              type: object
+                          type: object
+                        description: Validation metrics organized by section and severity.
+                        type: object
+                      score:
+                        properties:
+                          total:
+                            type: integer
+                            description: Overall quality score (0-100).
+                          info:
+                            type: integer
+                          security:
+                            type: integer
+                          servers:
+                            type: integer
+                          paths:
+                            type: integer
+                          components:
+                            type: integer
+                          other:
+                            type: integer
+                        type: object
+                      yaml:
+                        description: The original YAML content submitted.
+                        type: string
+                    type: object
+                  status:
+                    description: The overall validation result status.
+                    enum:
+                      - SPECIFICATION_ERROR
+                    type: string
+                    example: SPECIFICATION_ERROR
+                  status_code:
+                    description: A machine-readable code representing the validation status.
+                    type: string
+                    example: MUST_CRITERIA_FAILED
+                  status_message:
+                    description: A human-readable message describing the validation outcome.
+                    type: string
+                    example: 'The provided OpenAPI 3.x.x specification does not fulfill the MUST criteria.'
+                type: object
+          description: The input violates semantic rules.
+        '500':
+          content:
+            application/json:
+              schema:
+                description: A generic error response for 4xx or 5xx HTTP errors.
+                properties:
+                  error:
+                    description: A description of the problem with the request.
+                    type: string
+                type: object
+          description: An internal error occurred while processing the request.
       summary: Validates an OpenAPI 3.1 specification.
   /oas3/checkurl:
     get:
@@ -57,18 +456,202 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationResponse'
+                properties:
+                  data:
+                    properties:
+                      info:
+                        properties:
+                          date:
+                            format: date-time
+                            type: string
+                          filename:
+                            type: string
+                          title:
+                            type: string
+                          version:
+                            type: string
+                        type: object
+                      messages:
+                        items:
+                          description: A detailed validation message.
+                          properties:
+                            line:
+                              description: The line number where the rule applies.
+                              type: integer
+                            rule:
+                              description: The unique identifier of the validation rule.
+                              type: string
+                            section:
+                              description: The section of the specification the rule applies to.
+                              type: string
+                            severity:
+                              description: The severity level of the validation rule.
+                              enum:
+                                - MUST
+                                - SHOULD
+                                - MUST_NOT
+                                - OPTIONAL
+                              type: string
+                            status:
+                              description: Indicates if the rule passed, failed or skipped.
+                              enum:
+                                - PASS
+                                - SKIP
+                                - FAIL
+                              type: string
+                            title:
+                              description: The title of the validation rule.
+                              type: string
+                            url:
+                              description: A link to detailed documentation for the rule.
+                              format: uri
+                              type: string
+                          type: object
+                        type: array
+                      metrics:
+                        additionalProperties:
+                          properties:
+                            must:
+                              description: Metrics for a specific validation severity level.
+                              properties:
+                                failed:
+                                  description: Number of rules that failed validation.
+                                  type: integer
+                                passed:
+                                  description: Number of rules that passed validation.
+                                  type: integer
+                                total:
+                                  description: Total number of rules evaluated.
+                                  type: integer
+                              type: object
+                            must_not:
+                              description: Metrics for a specific validation severity level.
+                              properties:
+                                failed:
+                                  description: Number of rules that failed validation.
+                                  type: integer
+                                passed:
+                                  description: Number of rules that passed validation.
+                                  type: integer
+                                total:
+                                  description: Total number of rules evaluated.
+                                  type: integer
+                              type: object
+                            optional:
+                              description: Metrics for a specific validation severity level.
+                              properties:
+                                failed:
+                                  description: Number of rules that failed validation.
+                                  type: integer
+                                passed:
+                                  description: Number of rules that passed validation.
+                                  type: integer
+                                total:
+                                  description: Total number of rules evaluated.
+                                  type: integer
+                              type: object
+                            should:
+                              description: Metrics for a specific validation severity level.
+                              properties:
+                                failed:
+                                  description: Number of rules that failed validation.
+                                  type: integer
+                                passed:
+                                  description: Number of rules that passed validation.
+                                  type: integer
+                                total:
+                                  description: Total number of rules evaluated.
+                                  type: integer
+                              type: object
+                            total:
+                              description: Metrics for a specific validation severity level.
+                              properties:
+                                failed:
+                                  description: Number of rules that failed validation.
+                                  type: integer
+                                passed:
+                                  description: Number of rules that passed validation.
+                                  type: integer
+                                total:
+                                  description: Total number of rules evaluated.
+                                  type: integer
+                              type: object
+                          type: object
+                        description: Validation metrics organized by section and severity.
+                        type: object
+                      score:
+                        type: object
+                    type: object
+                  status:
+                    description: The overall validation result status.
+                    enum:
+                      - SPECIFICATION_VALID
+                      - SPECIFICATION_WARNING
+                      - SPECIFICATION_ERROR
+                    type: string
+                  status_code:
+                    description: A machine-readable code representing the validation status.
+                    type: string
+                  status_message:
+                    description: A human-readable message describing the validation outcome.
+                    type: string
+                type: object
           description: The OpenAPI specification was successfully validated.
         '400':
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              schema:
+                description: A generic error response for 4xx or 5xx HTTP errors.
+                properties:
+                  error:
+                    description: A description of the problem with the request.
+                    type: string
+                type: object
+          description: The request is invalid or improperly formatted.
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              schema:
+                description: A generic error response for 4xx or 5xx HTTP errors.
+                properties:
+                  error:
+                    description: A description of the problem with the request.
+                    type: string
+                type: object
+          description: Authentication is required and has not been provided or is invalid.
         '403':
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              schema:
+                description: A generic error response for 4xx or 5xx HTTP errors.
+                properties:
+                  error:
+                    description: A description of the problem with the request.
+                    type: string
+                type: object
+          description: The user does not have permission to access this resource.
         '422':
-          $ref: '#/components/responses/UnprocessableEntity'
+          content:
+            application/json:
+              schema:
+                description: A generic error response for 4xx or 5xx HTTP errors.
+                properties:
+                  error:
+                    description: A description of the problem with the request.
+                    type: string
+                type: object
+          description: The input violates semantic rules.
         '500':
-          $ref: '#/components/responses/InternalServerError'
+          content:
+            application/json:
+              schema:
+                description: A generic error response for 4xx or 5xx HTTP errors.
+                properties:
+                  error:
+                    description: A description of the problem with the request.
+                    type: string
+                type: object
+          description: An internal error occurred while processing the request.
       summary: Validates an OpenAPI 3.1 specification provided via a URL.
   /oas3/checkyaml:
     post:
@@ -87,170 +670,201 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ValidationResponse'
+                properties:
+                  data:
+                    properties:
+                      info:
+                        properties:
+                          date:
+                            format: date-time
+                            type: string
+                          filename:
+                            type: string
+                          title:
+                            type: string
+                          version:
+                            type: string
+                        type: object
+                      messages:
+                        items:
+                          description: A detailed validation message.
+                          properties:
+                            line:
+                              description: The line number where the rule applies.
+                              type: integer
+                            rule:
+                              description: The unique identifier of the validation rule.
+                              type: string
+                            section:
+                              description: The section of the specification the rule applies to.
+                              type: string
+                            severity:
+                              description: The severity level of the validation rule.
+                              enum:
+                                - MUST
+                                - SHOULD
+                                - MUST_NOT
+                                - OPTIONAL
+                              type: string
+                            status:
+                              description: Indicates if the rule passed, failed or skipped.
+                              enum:
+                                - PASS
+                                - SKIP
+                                - FAIL
+                              type: string
+                            title:
+                              description: The title of the validation rule.
+                              type: string
+                            url:
+                              description: A link to detailed documentation for the rule.
+                              format: uri
+                              type: string
+                          type: object
+                        type: array
+                      metrics:
+                        additionalProperties:
+                          properties:
+                            must:
+                              description: Metrics for a specific validation severity level.
+                              properties:
+                                failed:
+                                  description: Number of rules that failed validation.
+                                  type: integer
+                                passed:
+                                  description: Number of rules that passed validation.
+                                  type: integer
+                                total:
+                                  description: Total number of rules evaluated.
+                                  type: integer
+                              type: object
+                            must_not:
+                              description: Metrics for a specific validation severity level.
+                              properties:
+                                failed:
+                                  description: Number of rules that failed validation.
+                                  type: integer
+                                passed:
+                                  description: Number of rules that passed validation.
+                                  type: integer
+                                total:
+                                  description: Total number of rules evaluated.
+                                  type: integer
+                              type: object
+                            optional:
+                              description: Metrics for a specific validation severity level.
+                              properties:
+                                failed:
+                                  description: Number of rules that failed validation.
+                                  type: integer
+                                passed:
+                                  description: Number of rules that passed validation.
+                                  type: integer
+                                total:
+                                  description: Total number of rules evaluated.
+                                  type: integer
+                              type: object
+                            should:
+                              description: Metrics for a specific validation severity level.
+                              properties:
+                                failed:
+                                  description: Number of rules that failed validation.
+                                  type: integer
+                                passed:
+                                  description: Number of rules that passed validation.
+                                  type: integer
+                                total:
+                                  description: Total number of rules evaluated.
+                                  type: integer
+                              type: object
+                            total:
+                              description: Metrics for a specific validation severity level.
+                              properties:
+                                failed:
+                                  description: Number of rules that failed validation.
+                                  type: integer
+                                passed:
+                                  description: Number of rules that passed validation.
+                                  type: integer
+                                total:
+                                  description: Total number of rules evaluated.
+                                  type: integer
+                              type: object
+                          type: object
+                        description: Validation metrics organized by section and severity.
+                        type: object
+                      score:
+                        type: object
+                    type: object
+                  status:
+                    description: The overall validation result status.
+                    enum:
+                      - SPECIFICATION_VALID
+                      - SPECIFICATION_WARNING
+                      - SPECIFICATION_ERROR
+                    type: string
+                  status_code:
+                    description: A machine-readable code representing the validation status.
+                    type: string
+                  status_message:
+                    description: A human-readable message describing the validation outcome.
+                    type: string
+                type: object
           description: The OpenAPI specification was successfully validated.
         '400':
-          $ref: '#/components/responses/BadRequest'
+          content:
+            application/json:
+              schema:
+                description: A generic error response for 4xx or 5xx HTTP errors.
+                properties:
+                  error:
+                    description: A description of the problem with the request.
+                    type: string
+                type: object
+          description: The request is invalid or improperly formatted.
         '401':
-          $ref: '#/components/responses/Unauthorized'
+          content:
+            application/json:
+              schema:
+                description: A generic error response for 4xx or 5xx HTTP errors.
+                properties:
+                  error:
+                    description: A description of the problem with the request.
+                    type: string
+                type: object
+          description: Authentication is required and has not been provided or is invalid.
         '403':
-          $ref: '#/components/responses/Forbidden'
+          content:
+            application/json:
+              schema:
+                description: A generic error response for 4xx or 5xx HTTP errors.
+                properties:
+                  error:
+                    description: A description of the problem with the request.
+                    type: string
+                type: object
+          description: The user does not have permission to access this resource.
         '422':
-          $ref: '#/components/responses/UnprocessableEntity'
+          content:
+            application/json:
+              schema:
+                description: A generic error response for 4xx or 5xx HTTP errors.
+                properties:
+                  error:
+                    description: A description of the problem with the request.
+                    type: string
+                type: object
+          description: The input violates semantic rules.
         '500':
-          $ref: '#/components/responses/InternalServerError'
+          content:
+            application/json:
+              schema:
+                description: A generic error response for 4xx or 5xx HTTP errors.
+                properties:
+                  error:
+                    description: A description of the problem with the request.
+                    type: string
+                type: object
+          description: An internal error occurred while processing the request.
       summary: Validates an OpenAPI 3.1 specification provided as YAML.
-components:
-  responses:
-    BadRequest:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-      description: The request is invalid or improperly formatted.
-    Forbidden:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-      description: The user does not have permission to access this resource.
-    InternalServerError:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-      description: An internal error occurred while processing the request.
-    Unauthorized:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-      description: Authentication is required and has not been provided or is invalid.
-    UnprocessableEntity:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-      description: The input violates semantic rules.
-  schemas:
-    ErrorResponse:
-      description: A generic error response for 4xx or 5xx HTTP errors.
-      properties:
-        error:
-          description: A description of the problem with the request.
-          type: string
-      type: object
-    RateLimitResponse:
-      description: A response indicating the rate limit has been exceeded.
-      properties:
-        error:
-          description: A description of the rate limit exceeded error.
-          type: string
-        retry_after:
-          description: The time in seconds the client must wait before sending additional
-            requests.
-          type: integer
-      type: object
-    ValidationMessage:
-      description: A detailed validation message.
-      properties:
-        line:
-          description: The line number where the rule applies.
-          type: integer
-        rule:
-          description: The unique identifier of the validation rule.
-          type: string
-        section:
-          description: The section of the specification the rule applies to.
-          type: string
-        severity:
-          description: The severity level of the validation rule.
-          enum:
-            - MUST
-            - SHOULD
-            - MUST_NOT
-            - OPTIONAL
-          type: string
-        status:
-          description: Indicates if the rule passed, failed or skipped.
-          enum:
-            - PASS
-            - SKIP
-            - FAIL
-          type: string
-        title:
-          description: The title of the validation rule.
-          type: string
-        url:
-          description: A link to detailed documentation for the rule.
-          format: uri
-          type: string
-      type: object
-    ValidationMetrics:
-      description: Metrics for a specific validation severity level.
-      properties:
-        failed:
-          description: Number of rules that failed validation.
-          type: integer
-        passed:
-          description: Number of rules that passed validation.
-          type: integer
-        total:
-          description: Total number of rules evaluated.
-          type: integer
-      type: object
-    ValidationMetricsGroup:
-      additionalProperties:
-        properties:
-          must:
-            $ref: '#/components/schemas/ValidationMetrics'
-          must_not:
-            $ref: '#/components/schemas/ValidationMetrics'
-          optional:
-            $ref: '#/components/schemas/ValidationMetrics'
-          should:
-            $ref: '#/components/schemas/ValidationMetrics'
-          total:
-            $ref: '#/components/schemas/ValidationMetrics'
-        type: object
-      description: Validation metrics organized by section and severity.
-      type: object
-    ValidationResponse:
-      properties:
-        data:
-          properties:
-            info:
-              properties:
-                date:
-                  format: date-time
-                  type: string
-                filename:
-                  type: string
-                title:
-                  type: string
-                version:
-                  type: string
-              type: object
-            messages:
-              items:
-                $ref: '#/components/schemas/ValidationMessage'
-              type: array
-            metrics:
-              $ref: '#/components/schemas/ValidationMetricsGroup'
-            score:
-              type: object
-          type: object
-        status:
-          description: The overall validation result status.
-          enum:
-            - SPECIFICATION_VALID
-            - SPECIFICATION_WARNING
-            - SPECIFICATION_ERROR
-          type: string
-        status_code:
-          description: A machine-readable code representing the validation status.
-          type: string
-        status_message:
-          description: A human-readable message describing the validation outcome.
-          type: string
-      type: object
+

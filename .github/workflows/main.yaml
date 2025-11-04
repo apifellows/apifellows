@@ -27,6 +27,14 @@ on:
         options:
           - 'true'
           - 'false'
+      continue-on-specification-error:
+        description: 'Continue on specification validation errors (true/false)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
 
 jobs:
   test-linter-action:
@@ -43,3 +51,4 @@ jobs:
           version: ${{ inputs.version || 'v1' }}
           file-path: ${{ inputs.file-path || 'oas3/apifellows-linter-oas3-v1.yaml' }}
           continue-on-server-error: ${{ inputs.continue-on-server-error || 'false' }}
+          continue-on-specification-error: ${{ inputs.continue-on-specification-error || 'false' }}
