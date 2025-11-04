@@ -1,4 +1,4 @@
-name: Test OAS3 Linter Action
+name: @apifellows OAS3 Linter
 
 on:
   push:
@@ -17,7 +17,7 @@ on:
       file-path:
         description: 'Path to OpenAPI specification file'
         required: false
-        default: 'oas3/apifellows-linter-oas3-v1.yaml'
+        default: 'demo/demo-success-v0.yaml'
         type: string
       continue-on-server-error:
         description: 'Continue on server errors (true/false)'
@@ -37,8 +37,41 @@ on:
           - 'false'
 
 jobs:
-  test-linter-action:
-    name: Validate OpenAPI Specification
+ linter-oas3:
+    name: Validate Open API Specification (OAS3)
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Test Success Demo (Strict Mode)
+        uses: apifellows/gha-linter-oas3@v1
+        with:
+          version: 'v1'
+          file-path: 'demo/demo-success-v0.yaml'
+          continue-on-server-error: 'false'
+          continue-on-specification-error: 'false'
+      
+      - name: Test Warning Demo (Continue on Spec Errors)
+        uses: apifellows/gha-linter-oas3@v1
+        with:
+          version: 'v1'
+          file-path: 'demo/demo-warning-v0.yaml'
+          continue-on-server-error: 'false'
+          continue-on-specification-error: 'true'
+      
+      - name: Test Error Demo (Continue on Spec Errors)
+        uses: apifellows/gha-linter-oas3@v1
+        with:
+          version: 'v1'
+          file-path: 'demo/demo-error-v0.yaml'
+          continue-on-server-error: 'false'
+          continue-on-specification-error: 'true'
+
+ linter-oas3-manual:
+    name: Manual OAS3 Validation
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     
     steps:
@@ -46,9 +79,9 @@ jobs:
         uses: actions/checkout@v4
       
       - name: Run OAS3 Linter
-        uses: ./.github/actions/linter-oas3
+        uses: apifellows/gha-linter-oas3@v1
         with:
           version: ${{ inputs.version || 'v1' }}
-          file-path: ${{ inputs.file-path || 'oas3/apifellows-linter-oas3-v1.yaml' }}
+          file-path: ${{ inputs.file-path || 'demo/demo-success-v0.yaml' }}
           continue-on-server-error: ${{ inputs.continue-on-server-error || 'false' }}
           continue-on-specification-error: ${{ inputs.continue-on-specification-error || 'false' }}

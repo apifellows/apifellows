@@ -9,11 +9,11 @@ Everything at @apifellows is an API - so this repository contains, how else coul
 
 # @apifellows - REST API Specifications
 
-[![@apifellows score for Online REST API Linter API](https://www.apifellows.com/wp-json/api-linter/v0/oas3/badges/checkurl?url=https://raw.githubusercontent.com/apifellows/apifellows/refs/heads/main/oas3/apifellows-rest-api-linter-v0.yaml)](https://www.apifellows.com/rest-api-linter?url=https://raw.githubusercontent.com/apifellows/apifellows/refs/heads/main/oas3/apifellows-rest-api-linter-v0.yaml)
+[![@apifellows score for Online REST API Linter API](https://api.apifellows.com/linter-oas3/v1/oas3/badges/checkurl?url=https://raw.githubusercontent.com/apifellows/apifellows/refs/heads/main/demo/demo-success-v0.yaml)](https://www.apifellows.com/rest-api-linter?url=https://raw.githubusercontent.com/apifellows/apifellows/refs/heads/main/oas3/apifellows-rest-api-linter-v0.yaml)
 
 The main features our API currently provides:
 
-- /oas3/checkfile - Validate OAS3 provided as a file.
-- /oas3/checkurl - Validate OAS3 provided via a publicly accessible URL.
-- /oas3/checkyaml - Validate OAS3 provided as a YAML string in the request body.
-- /oas3/badges/checkurl - Show the validation score of an OAS3 provided via a publicly accessible URL as image.
+- POST /oas3/checkfile - Validate OAS3 provided as a file.
+- GET /oas3/checkurl - Validate OAS3 provided via a publicly accessible URL.
+- POST /oas3/checkyaml - Validate OAS3 provided as a YAML string in the request body.
+- GET /oas3/badges/checkurl - Show the validation score of an OAS3 provided via a publicly accessible URL as image.
