@@ -94,6 +94,9 @@ runs:
             echo "══════════════════════════════════════════════════════════════════"
             echo ""
             
+            # Temporarily disable exit on error for metric extraction
+            set +e
+            
             # Extract metrics using sed/awk for better compatibility
             # Extract score.total
             TOTAL_SCORE=$(echo "$BODY" | sed -n 's/.*"score"[[:space:]]*:[[:space:]]*{[^}]*"total"[[:space:]]*:[[:space:]]*\([0-9]*\).*/\1/p' | head -1)
@@ -114,6 +117,9 @@ runs:
             # Extract metrics.total.optional.failed
             OPTIONAL_FAILED=$(echo "$BODY" | grep -o '"metrics"[^}]*' | grep -o '"total"[^}]*' | grep -o '"optional"[^}]*' | grep -o '"failed":[0-9]*' | grep -o '[0-9]*' | head -1)
             [ -z "$OPTIONAL_FAILED" ] && OPTIONAL_FAILED="0"
+            
+            # Re-enable exit on error
+            set -e
             
             echo "📊 Quality Metrics:"
             echo "   • Total Score:        ${TOTAL_SCORE}%"
@@ -155,6 +161,9 @@ runs:
             echo "══════════════════════════════════════════════════════════════════"
             echo ""
             
+            # Temporarily disable exit on error for metric extraction
+            set +e
+            
             # Extract metrics using sed/awk for better compatibility
             # Extract score.total
             TOTAL_SCORE=$(echo "$BODY" | sed -n 's/.*"score"[[:space:]]*:[[:space:]]*{[^}]*"total"[[:space:]]*:[[:space:]]*\([0-9]*\).*/\1/p' | head -1)
@@ -175,6 +184,9 @@ runs:
             # Extract metrics.total.optional.failed
             OPTIONAL_FAILED=$(echo "$BODY" | grep -o '"metrics"[^}]*' | grep -o '"total"[^}]*' | grep -o '"optional"[^}]*' | grep -o '"failed":[0-9]*' | grep -o '[0-9]*' | head -1)
             [ -z "$OPTIONAL_FAILED" ] && OPTIONAL_FAILED="0"
+            
+            # Re-enable exit on error
+            set -e
             
             echo "📊 Quality Metrics:"
             echo "   • Total Score:        ${TOTAL_SCORE}%"
