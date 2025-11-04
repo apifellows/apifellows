@@ -1,0 +1,28 @@
+name: Test OAS3 Linter Action
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+jobs:
+  test-linter-action:
+    name: Validate OpenAPI Specification
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Run OAS3 Linter
+        uses: ./.github/actions/linter-oas3
+        with:
+          version: 'vlatest'
+          file-path: 'oas3/apifellows-linter-oas3-v1.yaml'
+          continue-on-server-error: 'false'

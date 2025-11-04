@@ -1,0 +1,49 @@
+openapi: 3.1.0
+info:
+  contact:
+    email: support@apifellows.com
+    name: '@apifellows Support Team'
+    url: https://www.apifellows.com/support
+  title: '@apifellows Online REST API Linter'
+  version: 0.1.0
+  summary: Validate your OAS3 specificatsion online with the @apifellows REST API Linter
+  description: 'This REST API allows users to validate their OpenAPI Specification
+      in version 3.x (OAS3) against our REST API guidelines. It provides tools for:
+      - Validating OpenAPI Specification YAML-files.
+      - Linting and enforcing REST API guidelines.
+      - Reporting compliance issues and suggested fixes.'
+  termsOfService: https://www.apifellows.com/terms
+servers:
+  - description: '@apifellows production environment'
+    url: https://www.apifellows.com/wp-json/api-linter/v0
+tags:
+  - name: oas3
+    description: OpenAPI 3.x validation
+paths:
+  /oas3/checkyaml:
+    summary: Validate OAS3 provided as a YAML string in the request body.
+    description: This endpoint validates an OpenAPI 3.1 specification provided directly as a YAML string in the body.
+    post:
+      tags:
+        - oas3
+      summary: Validate OAS3 provided as a YAML string in the request body.
+      description: This endpoint validates an OpenAPI 3.1 specification provided directly as a YAML string in the body.
+      operationId: validateSpecYaml
+      requestBody:
+        content:
+          application/yaml:
+            schema:
+              description: The OpenAPI 3.1 specification as a YAML string.
+              type: string
+        required: true
+      responses:
+        '200':
+          description: The OpenAPI specification was perfectly validated.
+        '400':
+          description: The OpenAPI specification is invalid yaml / client error.
+        '422':
+          description: The OpenAPI specification was validated, yaml is valid, but has some issues
+        '429':
+          description: Rate limit hit
+        '500':
+          description: server error

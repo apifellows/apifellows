@@ -1,0 +1,256 @@
+openapi: 3.1.0
+info:
+  contact:
+    email: support@apifellows.com
+    name: '@apifellows Support Team'
+    url: https://www.apifellows.com/support
+  description: 'This REST API allows users to validate their OpenAPI Specification
+    in version 3.x (OAS3) against our REST API guidelines. It provides tools for:
+    - Validating OpenAPI Specification YAML-files.
+    - Linting and enforcing REST API guidelines.
+    - Reporting compliance issues and suggested fixes.'
+  title: '@apifellows Online REST API Linter'
+  version: 1.0.0
+servers:
+  - description: '@apifellows local environment'
+    url: http://localhost/
+  - description: '@apifellows production environment'
+    url: https://api.apifellows.com/linter-oas3/v1
+paths:
+  /oas3/checkfile:
+    post:
+      description: This endpoint validates an OpenAPI 3.1 specification provided as
+        a file. It returns details about any validation errors or warnings.
+      operationId: validateSpec
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              properties:
+                file:
+                  description: The OpenAPI 3.1 specification file to validate.
+                  format: binary
+                  type: string
+              required:
+              - file
+              type: object
+        required: true
+      responses:
+        '200':
+          description: The OpenAPI specification was successfully validated.
+      summary: Validates an OpenAPI 3.1 specification.
+  /oas3/checkurl:
+    get:
+      description: This endpoint validates an OpenAPI 3.1 specification accessible
+        via a URL.
+      operationId: validateSpecUrl
+      parameters:
+      - description: The URL of the OpenAPI 3.1 specification to validate.
+        in: query
+        name: url
+        required: true
+        schema:
+          format: uri
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+          description: The OpenAPI specification was successfully validated.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      summary: Validates an OpenAPI 3.1 specification provided via a URL.
+  /oas3/checkyaml:
+    post:
+      description: This endpoint validates an OpenAPI 3.1 specification provided directly
+        as a YAML string in the body.
+      operationId: validateSpecYaml
+      requestBody:
+        content:
+          application/yaml:
+            schema:
+              description: The OpenAPI 3.1 specification as a YAML string.
+              type: string
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationResponse'
+          description: The OpenAPI specification was successfully validated.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      summary: Validates an OpenAPI 3.1 specification provided as YAML.
+components:
+  responses:
+    BadRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+      description: The request is invalid or improperly formatted.
+    Forbidden:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+      description: The user does not have permission to access this resource.
+    InternalServerError:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+      description: An internal error occurred while processing the request.
+    Unauthorized:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+      description: Authentication is required and has not been provided or is invalid.
+    UnprocessableEntity:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+      description: The input violates semantic rules.
+  schemas:
+    ErrorResponse:
+      description: A generic error response for 4xx or 5xx HTTP errors.
+      properties:
+        error:
+          description: A description of the problem with the request.
+          type: string
+      type: object
+    RateLimitResponse:
+      description: A response indicating the rate limit has been exceeded.
+      properties:
+        error:
+          description: A description of the rate limit exceeded error.
+          type: string
+        retry_after:
+          description: The time in seconds the client must wait before sending additional
+            requests.
+          type: integer
+      type: object
+    ValidationMessage:
+      description: A detailed validation message.
+      properties:
+        line:
+          description: The line number where the rule applies.
+          type: integer
+        rule:
+          description: The unique identifier of the validation rule.
+          type: string
+        section:
+          description: The section of the specification the rule applies to.
+          type: string
+        severity:
+          description: The severity level of the validation rule.
+          enum:
+            - MUST
+            - SHOULD
+            - MUST_NOT
+            - OPTIONAL
+          type: string
+        status:
+          description: Indicates if the rule passed, failed or skipped.
+          enum:
+            - PASS
+            - SKIP
+            - FAIL
+          type: string
+        title:
+          description: The title of the validation rule.
+          type: string
+        url:
+          description: A link to detailed documentation for the rule.
+          format: uri
+          type: string
+      type: object
+    ValidationMetrics:
+      description: Metrics for a specific validation severity level.
+      properties:
+        failed:
+          description: Number of rules that failed validation.
+          type: integer
+        passed:
+          description: Number of rules that passed validation.
+          type: integer
+        total:
+          description: Total number of rules evaluated.
+          type: integer
+      type: object
+    ValidationMetricsGroup:
+      additionalProperties:
+        properties:
+          must:
+            $ref: '#/components/schemas/ValidationMetrics'
+          must_not:
+            $ref: '#/components/schemas/ValidationMetrics'
+          optional:
+            $ref: '#/components/schemas/ValidationMetrics'
+          should:
+            $ref: '#/components/schemas/ValidationMetrics'
+          total:
+            $ref: '#/components/schemas/ValidationMetrics'
+        type: object
+      description: Validation metrics organized by section and severity.
+      type: object
+    ValidationResponse:
+      properties:
+        data:
+          properties:
+            info:
+              properties:
+                date:
+                  format: date-time
+                  type: string
+                filename:
+                  type: string
+                title:
+                  type: string
+                version:
+                  type: string
+              type: object
+            messages:
+              items:
+                $ref: '#/components/schemas/ValidationMessage'
+              type: array
+            metrics:
+              $ref: '#/components/schemas/ValidationMetricsGroup'
+            score:
+              type: object
+          type: object
+        status:
+          description: The overall validation result status.
+          enum:
+            - SPECIFICATION_VALID
+            - SPECIFICATION_WARNING
+            - SPECIFICATION_ERROR
+          type: string
+        status_code:
+          description: A machine-readable code representing the validation status.
+          type: string
+        status_message:
+          description: A human-readable message describing the validation outcome.
+          type: string
+      type: object
