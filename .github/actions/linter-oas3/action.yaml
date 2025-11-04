@@ -93,42 +93,10 @@ runs:
             echo "✅ VALIDATION SUCCESSFUL"
             echo "══════════════════════════════════════════════════════════════════"
             echo ""
-            
-            # Temporarily disable exit on error for metric extraction
-            set +e
-            
-            # Extract metrics using sed/awk for better compatibility
-            # Extract score.total
-            TOTAL_SCORE=$(echo "$BODY" | sed -n 's/.*"score"[[:space:]]*:[[:space:]]*{[^}]*"total"[[:space:]]*:[[:space:]]*\([0-9]*\).*/\1/p' | head -1)
-            [ -z "$TOTAL_SCORE" ] && TOTAL_SCORE="N/A"
-            
-            # Extract metrics.total.total.passed
-            TOTAL_PASSED=$(echo "$BODY" | grep -o '"metrics"[^}]*' | grep -o '"total"[^}]*' | tail -1 | grep -o '"passed":[0-9]*' | grep -o '[0-9]*' | head -1)
-            [ -z "$TOTAL_PASSED" ] && TOTAL_PASSED="0"
-            
-            # Extract metrics.total.must.failed
-            MUST_FAILED=$(echo "$BODY" | grep -o '"metrics"[^}]*' | grep -o '"total"[^}]*' | grep -o '"must"[^}]*' | grep -o '"failed":[0-9]*' | grep -o '[0-9]*' | head -1)
-            [ -z "$MUST_FAILED" ] && MUST_FAILED="0"
-            
-            # Extract metrics.total.should.failed  
-            SHOULD_FAILED=$(echo "$BODY" | grep -o '"metrics"[^}]*' | grep -o '"total"[^}]*' | grep -o '"should"[^}]*' | grep -o '"failed":[0-9]*' | grep -o '[0-9]*' | head -1)
-            [ -z "$SHOULD_FAILED" ] && SHOULD_FAILED="0"
-            
-            # Extract metrics.total.optional.failed
-            OPTIONAL_FAILED=$(echo "$BODY" | grep -o '"metrics"[^}]*' | grep -o '"total"[^}]*' | grep -o '"optional"[^}]*' | grep -o '"failed":[0-9]*' | grep -o '[0-9]*' | head -1)
-            [ -z "$OPTIONAL_FAILED" ] && OPTIONAL_FAILED="0"
-            
-            # Re-enable exit on error
-            set -e
-            
-            echo "📊 Quality Metrics:"
-            echo "   • Total Score:        ${TOTAL_SCORE}%"
-            echo "   • Total Passed:       ${TOTAL_PASSED}"
-            echo "   • Total MUST Errors:  ${MUST_FAILED}"
-            echo "   • Total SHOULD Errors: ${SHOULD_FAILED}"
-            echo "   • Total COULD Errors:  ${OPTIONAL_FAILED}"
+            echo "Your OpenAPI specification is valid!"
             echo ""
-            echo "🔗 View detailed report: https://www.apifellows.com/"
+            echo "🔗 For detailed metrics, upload your file at:"
+            echo "   https://www.apifellows.com/"
             echo ""
             
             echo "result=success" >> $GITHUB_OUTPUT
@@ -157,72 +125,13 @@ runs:
             
           422)
             echo "══════════════════════════════════════════════════════════════════"
-            echo "⚠️  VALIDATION FAILED - Issues Found"
+            echo "❌ VALIDATION FAILED - Issues Found"
             echo "══════════════════════════════════════════════════════════════════"
             echo ""
-            
-            # Temporarily disable exit on error for metric extraction
-            set +e
-            
-            # Extract metrics using sed/awk for better compatibility
-            # Extract score.total
-            TOTAL_SCORE=$(echo "$BODY" | sed -n 's/.*"score"[[:space:]]*:[[:space:]]*{[^}]*"total"[[:space:]]*:[[:space:]]*\([0-9]*\).*/\1/p' | head -1)
-            [ -z "$TOTAL_SCORE" ] && TOTAL_SCORE="N/A"
-            
-            # Extract metrics.total.total.passed
-            TOTAL_PASSED=$(echo "$BODY" | grep -o '"metrics"[^}]*' | grep -o '"total"[^}]*' | tail -1 | grep -o '"passed":[0-9]*' | grep -o '[0-9]*' | head -1)
-            [ -z "$TOTAL_PASSED" ] && TOTAL_PASSED="0"
-            
-            # Extract metrics.total.must.failed
-            MUST_FAILED=$(echo "$BODY" | grep -o '"metrics"[^}]*' | grep -o '"total"[^}]*' | grep -o '"must"[^}]*' | grep -o '"failed":[0-9]*' | grep -o '[0-9]*' | head -1)
-            [ -z "$MUST_FAILED" ] && MUST_FAILED="0"
-            
-            # Extract metrics.total.should.failed  
-            SHOULD_FAILED=$(echo "$BODY" | grep -o '"metrics"[^}]*' | grep -o '"total"[^}]*' | grep -o '"should"[^}]*' | grep -o '"failed":[0-9]*' | grep -o '[0-9]*' | head -1)
-            [ -z "$SHOULD_FAILED" ] && SHOULD_FAILED="0"
-            
-            # Extract metrics.total.optional.failed
-            OPTIONAL_FAILED=$(echo "$BODY" | grep -o '"metrics"[^}]*' | grep -o '"total"[^}]*' | grep -o '"optional"[^}]*' | grep -o '"failed":[0-9]*' | grep -o '[0-9]*' | head -1)
-            [ -z "$OPTIONAL_FAILED" ] && OPTIONAL_FAILED="0"
-            
-            # Re-enable exit on error
-            set -e
-            
-            echo "📊 Quality Metrics:"
-            echo "   • Total Score:        ${TOTAL_SCORE}%"
-            echo "   • Total Passed:       ${TOTAL_PASSED}"
-            echo "   • Total MUST Errors:  ${MUST_FAILED}"
-            echo "   • Total SHOULD Errors: ${SHOULD_FAILED}"
-            echo "   • Total COULD Errors:  ${OPTIONAL_FAILED}"
+            echo "Your OpenAPI specification contains validation errors."
             echo ""
-            echo "🔗 View detailed report: https://www.apifellows.com/"
-            echo ""
-            
-            # Extract and display MUST errors
-            echo "❌ MUST Errors (must be fixed):"
-            echo ""
-            
-            # Extract messages with proper JSON parsing (simplified - works for most cases)
-            echo "$BODY" | grep -o '"severity":"MUST"[^}]*"status":"FAIL"[^}]*' | while IFS= read -r MSG; do
-              LINE=$(echo "$MSG" | grep -o '"line":[0-9]*' | cut -d':' -f2)
-              TITLE=$(echo "$MSG" | grep -o '"title":"[^"]*"' | cut -d'"' -f4)
-              
-              if [ ! -z "$LINE" ] && [ ! -z "$TITLE" ]; then
-                echo "  • Line $LINE: $TITLE"
-              fi
-            done
-            
-            # Alternative approach if the first one doesn't capture all errors
-            if ! echo "$BODY" | grep -q '"severity":"MUST"[^}]*"status":"FAIL"'; then
-              # Fallback: just extract line numbers for FAIL status
-              echo "$BODY" | grep -o '"status":"FAIL"[^}]*"line":[0-9]*' | while IFS= read -r MSG; do
-                LINE=$(echo "$MSG" | grep -o '"line":[0-9]*' | cut -d':' -f2)
-                if [ ! -z "$LINE" ]; then
-                  echo "  • Line $LINE: Validation error"
-                fi
-              done
-            fi
-            
+            echo "🔗 For detailed error report, upload your file at:"
+            echo "   https://www.apifellows.com/"
             echo ""
             
             if [ "$CONTINUE_ON_SPEC_ERROR" = "true" ]; then
