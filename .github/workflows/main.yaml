@@ -23,6 +23,6 @@ jobs:
       - name: Run OAS3 Linter
         uses: ./.github/actions/linter-oas3
         with:
-          version: 'vlatest'
+          version: 'v1'
           file-path: 'oas3/apifellows-linter-oas3-v1.yaml'
           continue-on-server-error: 'false'
