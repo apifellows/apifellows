@@ -69,9 +69,10 @@ runs:
         echo "🔍 Validating specification..."
         echo ""
         
-        # Make API request
+        # Make API request with proper content type header
         RESPONSE=$(curl -s -w "\n%{http_code}" -X POST \
-          -F "file=@$FILE_PATH" \
+          -H "Accept: application/json" \
+          -F "file=@${FILE_PATH};type=application/x-yaml" \
           "$API_URL")
         
         # Extract status code (last line)
@@ -83,6 +84,14 @@ runs:
         echo "status_code=$HTTP_CODE" >> $GITHUB_OUTPUT
         
         echo "📡 API Response: HTTP $HTTP_CODE"
+        echo ""
+        
+        # Debug: Show response body if not 200
+        if [ "$HTTP_CODE" != "200" ]; then
+          echo "Response body:"
+          echo "$BODY"
+          echo ""
+        fi
         echo ""
         
         # Handle different status codes
