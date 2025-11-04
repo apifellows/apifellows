@@ -4,12 +4,29 @@ on:
   push:
     branches:
       - main
-      - develop
   pull_request:
     branches:
       - main
-      - develop
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'API Version (e.g., v1, v2)'
+        required: false
+        default: 'v1'
+        type: string
+      file-path:
+        description: 'Path to OpenAPI specification file'
+        required: false
+        default: 'oas3/apifellows-linter-oas3-v1.yaml'
+        type: string
+      continue-on-server-error:
+        description: 'Continue on server errors (true/false)'
+        required: false
+        default: 'false'
+        type: choice
+        options:
+          - 'true'
+          - 'false'
 
 jobs:
   test-linter-action:
@@ -23,6 +40,6 @@ jobs:
       - name: Run OAS3 Linter
         uses: ./.github/actions/linter-oas3
         with:
-          version: 'v1'
-          file-path: 'oas3/apifellows-linter-oas3-v1.yaml'
-          continue-on-server-error: 'false'
+          version: ${{ inputs.version || 'v1' }}
+          file-path: ${{ inputs.file-path || 'oas3/apifellows-linter-oas3-v1.yaml' }}
+          continue-on-server-error: ${{ inputs.continue-on-server-error || 'false' }}
