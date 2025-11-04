@@ -16,24 +16,6 @@ servers:
     url: http://localhost/
   - description: '@apifellows production environment'
     url: https://api.apifellows.com/linter-oas3/v1
-openapi: 3.1.0
-info:
-  contact:
-    email: support@apifellows.com
-    name: '@apifellows Support Team'
-    url: https://www.apifellows.com/support
-  description: 'This REST API allows users to validate their OpenAPI Specification
-    in version 3.x (OAS3) against our REST API guidelines. It provides tools for:
-    - Validating OpenAPI Specification YAML-files.
-    - Linting and enforcing REST API guidelines.
-    - Reporting compliance issues and suggested fixes.'
-  title: '@apifellows Online REST API Linter'
-  version: 1.0.0
-servers:
-  - description: '@apifellows local environment'
-    url: http://localhost/
-  - description: '@apifellows production environment'
-    url: https://api.apifellows.com/linter-oas3/v1
 paths:
   /oas3/checkfile:
     post:
