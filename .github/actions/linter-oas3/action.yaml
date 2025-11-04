@@ -94,20 +94,26 @@ runs:
             echo "══════════════════════════════════════════════════════════════════"
             echo ""
             
-            # Extract metrics - improved JSON parsing
-            TOTAL_SCORE=$(echo "$BODY" | grep -oP '"score"\s*:\s*\{\s*"total"\s*:\s*\K[0-9]+' || echo "$BODY" | grep -o '"total":[0-9]*' | grep -o '[0-9]*' | head -1 || echo "N/A")
+            # Extract metrics using sed/awk for better compatibility
+            # Extract score.total
+            TOTAL_SCORE=$(echo "$BODY" | sed -n 's/.*"score"[[:space:]]*:[[:space:]]*{[^}]*"total"[[:space:]]*:[[:space:]]*\([0-9]*\).*/\1/p' | head -1)
+            [ -z "$TOTAL_SCORE" ] && TOTAL_SCORE="N/A"
             
-            # Extract from metrics.total.total.passed
-            TOTAL_PASSED=$(echo "$BODY" | grep -oP '"metrics"\s*:\s*\{.*?"total"\s*:\s*\{.*?"total"\s*:\s*\{.*?"passed"\s*:\s*\K[0-9]+' || echo "0")
+            # Extract metrics.total.total.passed
+            TOTAL_PASSED=$(echo "$BODY" | grep -o '"metrics"[^}]*' | grep -o '"total"[^}]*' | tail -1 | grep -o '"passed":[0-9]*' | grep -o '[0-9]*' | head -1)
+            [ -z "$TOTAL_PASSED" ] && TOTAL_PASSED="0"
             
-            # Extract from metrics.total.must.failed
-            MUST_FAILED=$(echo "$BODY" | grep -oP '"metrics"\s*:\s*\{.*?"total"\s*:\s*\{.*?"must"\s*:\s*\{.*?"failed"\s*:\s*\K[0-9]+' || echo "0")
+            # Extract metrics.total.must.failed
+            MUST_FAILED=$(echo "$BODY" | grep -o '"metrics"[^}]*' | grep -o '"total"[^}]*' | grep -o '"must"[^}]*' | grep -o '"failed":[0-9]*' | grep -o '[0-9]*' | head -1)
+            [ -z "$MUST_FAILED" ] && MUST_FAILED="0"
             
-            # Extract from metrics.total.should.failed
-            SHOULD_FAILED=$(echo "$BODY" | grep -oP '"metrics"\s*:\s*\{.*?"total"\s*:\s*\{.*?"should"\s*:\s*\{.*?"failed"\s*:\s*\K[0-9]+' || echo "0")
+            # Extract metrics.total.should.failed  
+            SHOULD_FAILED=$(echo "$BODY" | grep -o '"metrics"[^}]*' | grep -o '"total"[^}]*' | grep -o '"should"[^}]*' | grep -o '"failed":[0-9]*' | grep -o '[0-9]*' | head -1)
+            [ -z "$SHOULD_FAILED" ] && SHOULD_FAILED="0"
             
-            # Extract from metrics.total.optional.failed
-            OPTIONAL_FAILED=$(echo "$BODY" | grep -oP '"metrics"\s*:\s*\{.*?"total"\s*:\s*\{.*?"optional"\s*:\s*\{.*?"failed"\s*:\s*\K[0-9]+' || echo "0")
+            # Extract metrics.total.optional.failed
+            OPTIONAL_FAILED=$(echo "$BODY" | grep -o '"metrics"[^}]*' | grep -o '"total"[^}]*' | grep -o '"optional"[^}]*' | grep -o '"failed":[0-9]*' | grep -o '[0-9]*' | head -1)
+            [ -z "$OPTIONAL_FAILED" ] && OPTIONAL_FAILED="0"
             
             echo "📊 Quality Metrics:"
             echo "   • Total Score:        ${TOTAL_SCORE}%"
@@ -149,20 +155,26 @@ runs:
             echo "══════════════════════════════════════════════════════════════════"
             echo ""
             
-            # Extract metrics - improved JSON parsing
-            TOTAL_SCORE=$(echo "$BODY" | grep -oP '"score"\s*:\s*\{\s*"total"\s*:\s*\K[0-9]+' || echo "$BODY" | grep -o '"total":[0-9]*' | grep -o '[0-9]*' | head -1 || echo "N/A")
+            # Extract metrics using sed/awk for better compatibility
+            # Extract score.total
+            TOTAL_SCORE=$(echo "$BODY" | sed -n 's/.*"score"[[:space:]]*:[[:space:]]*{[^}]*"total"[[:space:]]*:[[:space:]]*\([0-9]*\).*/\1/p' | head -1)
+            [ -z "$TOTAL_SCORE" ] && TOTAL_SCORE="N/A"
             
-            # Extract from metrics.total.total.passed
-            TOTAL_PASSED=$(echo "$BODY" | grep -oP '"metrics"\s*:\s*\{.*?"total"\s*:\s*\{.*?"total"\s*:\s*\{.*?"passed"\s*:\s*\K[0-9]+' || echo "0")
+            # Extract metrics.total.total.passed
+            TOTAL_PASSED=$(echo "$BODY" | grep -o '"metrics"[^}]*' | grep -o '"total"[^}]*' | tail -1 | grep -o '"passed":[0-9]*' | grep -o '[0-9]*' | head -1)
+            [ -z "$TOTAL_PASSED" ] && TOTAL_PASSED="0"
             
-            # Extract from metrics.total.must.failed
-            MUST_FAILED=$(echo "$BODY" | grep -oP '"metrics"\s*:\s*\{.*?"total"\s*:\s*\{.*?"must"\s*:\s*\{.*?"failed"\s*:\s*\K[0-9]+' || echo "0")
+            # Extract metrics.total.must.failed
+            MUST_FAILED=$(echo "$BODY" | grep -o '"metrics"[^}]*' | grep -o '"total"[^}]*' | grep -o '"must"[^}]*' | grep -o '"failed":[0-9]*' | grep -o '[0-9]*' | head -1)
+            [ -z "$MUST_FAILED" ] && MUST_FAILED="0"
             
-            # Extract from metrics.total.should.failed
-            SHOULD_FAILED=$(echo "$BODY" | grep -oP '"metrics"\s*:\s*\{.*?"total"\s*:\s*\{.*?"should"\s*:\s*\{.*?"failed"\s*:\s*\K[0-9]+' || echo "0")
+            # Extract metrics.total.should.failed  
+            SHOULD_FAILED=$(echo "$BODY" | grep -o '"metrics"[^}]*' | grep -o '"total"[^}]*' | grep -o '"should"[^}]*' | grep -o '"failed":[0-9]*' | grep -o '[0-9]*' | head -1)
+            [ -z "$SHOULD_FAILED" ] && SHOULD_FAILED="0"
             
-            # Extract from metrics.total.optional.failed
-            OPTIONAL_FAILED=$(echo "$BODY" | grep -oP '"metrics"\s*:\s*\{.*?"total"\s*:\s*\{.*?"optional"\s*:\s*\{.*?"failed"\s*:\s*\K[0-9]+' || echo "0")
+            # Extract metrics.total.optional.failed
+            OPTIONAL_FAILED=$(echo "$BODY" | grep -o '"metrics"[^}]*' | grep -o '"total"[^}]*' | grep -o '"optional"[^}]*' | grep -o '"failed":[0-9]*' | grep -o '[0-9]*' | head -1)
+            [ -z "$OPTIONAL_FAILED" ] && OPTIONAL_FAILED="0"
             
             echo "📊 Quality Metrics:"
             echo "   • Total Score:        ${TOTAL_SCORE}%"
